@@ -1,11 +1,10 @@
 import tweepy
-from tweepy import OAuth1UserHandler, StreamingClient
-import socket
+from tweepy import StreamingClient
 import json
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
+from twitter_kafka_producer import send_message
 
 # get key from .env file
 api_key = os.getenv("API_KEY")
@@ -28,7 +27,7 @@ def check_rules(bearer_token:str, rules:list, tags:list) -> None:
             client.add_rules(tweepy.StreamRule(value=rule, tag=tag))
 
     client = tweepy.StreamingClient(bearer_token, wait_on_rate_limit=True)
-    print(client.get_rules())
+    # print(client.get_rules())
     if client.get_rules()[3]['result_count'] != 0:
         n_rules = client.get_rules()[0]
         ids = [n_rules[i_tuple[0]][2] for i_tuple in enumerate(n_rules)]
@@ -41,18 +40,18 @@ def check_rules(bearer_token:str, rules:list, tags:list) -> None:
 # Creating a Twitter stream listener class:
 
 class Listener(tweepy.StreamingClient):
+    def on_data(self, data):
+        message = json.loads(data)
+        send_message(message)
+
     def on_connect(self):
         print("Connecting...")
-
-    def on_data(self, data:dict):
-        print(data)
     
     def on_error(self, status):
         print(status)
     
     def on_connection_error(self):
         self.disconnect()
-
 # Getting necessary variables from config.json:
 
 with open('config.json', 'r') as config_file:
@@ -73,8 +72,10 @@ rules = [f"{config.get('Meta')} {query}",
 def main():
     # Setting up Tweepy filter configuration:
     check_rules(bearer_token, rules, tags)
+    # Start and configure Kafka producer and topics:
+    # configure_create_topics(topics=tags)
     # Start streaming:
     Listener(bearer_token).filter(tweet_fields=['created_at'])
 
 if __name__ == '__main__':
-    main()
+     main()

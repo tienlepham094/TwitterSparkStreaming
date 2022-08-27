@@ -1,0 +1,10 @@
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.apache.spark:spark-streaming-kafka-0-10_2.12:3.0.1 twitter_spark.py localhost:9092 twitter_streaming
+# disable port
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+
+# start zookeeper
+zookeeper-server-start.sh ~/kafka_2.13-3.0.0/config/zookeeper.properties
+
+# start kafka server
+kafka-server-start.sh ~/kafka_2.13-3.0.0/config/server.properties

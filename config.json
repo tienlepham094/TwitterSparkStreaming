@@ -4,7 +4,8 @@
     "Amazon": "context:47.10026792024",
     "Netflix": "context:57.10026367762",
     "Google": "context:47.10026378521",
-    "query": "(#Faang OR #Apple OR #Meta OR #Amazon OR #Netflix OR #Google OR #Facebook) lang:en -is:retweet"
+    "query": "(#Faang OR #Apple OR #Meta OR #Amazon OR #Netflix OR #Google OR #Facebook) lang:en -is:retweet",
+    "mongoDB":
 }
 
 
