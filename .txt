@@ -1,4 +1,4 @@
-spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.apache.spark:spark-streaming-kafka-0-10_2.12:3.0.1 twitter_spark.py localhost:9092 twitter_streaming
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.3,org.apache.spark:spark-streaming-kafka-0-10_2.12:3.1.3 twitter_spark.py
 # disable port
 sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
 sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
@@ -8,3 +8,9 @@ zookeeper-server-start.sh ~/kafka_2.13-3.0.0/config/zookeeper.properties
 
 # start kafka server
 kafka-server-start.sh ~/kafka_2.13-3.0.0/config/server.properties
+
+# read kafka consumer
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic twitter_streaming
+
+# reset offset
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group my-first-application --reset-offsets --to-earliest --topic twitter_streaming --execute

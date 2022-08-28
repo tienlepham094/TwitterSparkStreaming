@@ -1,50 +1,82 @@
 import findspark
-findspark.init("D:\Spark\spark-3.1.3-bin-hadoop3.2")
+findspark.init()
 import pyspark
 from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
-from pyspark.sql import SQLContext, SparkSession
-from pyspark.sql.types import StringType, StructType, StructField, ArrayType
-from pyspark.sql.functions import udf, from_json, col
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.functions import *
+from pyspark.sql.types import StructType,TimestampType, DoubleType, StringType, StructField
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-KAFKA_TOPIC_NAME = "twitter_streaming"
+mongo_db = os.getenv("mongoDB")
+KAFKA_TOPIC_NAME= 'twitter_streaming'
 KAFKA_BOOTSTRAP_SERVERS = '127.0.0.1:9092'
-spark = SparkSession.builder\
-        .appName("Kafka Pyspark Streamin Learning")\
-            .master("local[*]").getOrCreate()
 
-# Construct a streaming DataFrame that reads from testtopic
-# Subscribe to 1 topic
+packages = ','.join(
+        [
+            'org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.3',
+            'org.mongodb.spark:mongo-spark-connector_2.12:3.1.3'
+        ]
+    )
+spark = SparkSession.\
+        builder.\
+        appName("TwitterStreaming").\
+        config('spark.jars.packages', packages) \
+         .config("spark.driver.memory","8G")\
+        .config("spark.driver.maxResultSize", "0") \
+        .config("spark.mongodb.input.uri", mongo_db) \
+        .config("spark.mongodb.output.uri", mongo_db) \
+        .getOrCreate()
+
+schema = StructType() \
+        .add("data", StructType() \
+            .add("created_at", StringType())
+            .add("id", StringType())
+            .add("text", StringType()))
 df = spark \
   .readStream \
   .format("kafka") \
+  .option("startingOffsets", "latest") \
   .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS) \
   .option("subscribe", KAFKA_TOPIC_NAME) \
-  .option("startingOffsets", "latest") \
-  .option("startingOffsets", "latest") \
-  .option("header", "true") \
-  .load() 
-
-def aggregate_df(processed_df:DataFrame, config:dict) -> None:
-    '''Aggregates data from the last hour and send it to mongoDB'''   
-    
-    agg_sentiment = processed_df.groupBy("topic") \
-      .agg(F.avg(F.when(F.col("sentiment").eqNullSafe("positive"), 1) \
-          .otherwise(0)).alias('positivity'), 
-          F.count(F.col('topic')).alias('counts')) \
-      .withColumn('created_at', F.current_timestamp()) \
-      .select(F.col('topic').alias('topic_agg'), 
-              F.round('positivity', 2).alias('positivity_rate'), 
-              'counts', 'created_at')
-    
-    agg_emotion = processed_df.groupby('topic', 'emotion') \
-        .agg(F.count(F.col('topic')).alias('counts')) \
-        .groupby('topic').pivot('emotion').sum('counts').na.fill(0)
-    
-    inner_join = agg_sentiment.join(agg_emotion, 
-        agg_sentiment.topic_agg == agg_emotion.topic) \
-        .select('*')
-    
-    inner_join.write.format("mongo").mode("append").option("uri", config.get("mongoDB")).save()
+  .load() \
+  .select(F.col('key').cast('string'),
+            F.from_json(F.col("value").cast("string"), 
+                schema)['data']['created_at'].alias('created_at'),
+            F.from_json(F.col("value").cast("string"), 
+                schema)['data']['text'].alias('text')) 
 
 
+
+
+
+# schemaKafka = StructType([ \
+#     StructField("data",StringType(),True),\
+#     StructField("matching_rules", StringType(), True)])
+
+
+
+# stockDF=stockDF.select(from_json(col('value'),schemaKafka).alias("json_data")).selectExpr('json_data.*')
+
+
+# query= df.writeStream \
+#     .format("mongodb") \
+#     .option('spark.mongodb.connection.uri', mongo_db) \
+#     .option('spark.mongodb.database', 'twitter') \
+#     .option('spark.mongodb.collection', 'twitter_streaming') \
+#     .option("checkpointLocation", "/text") \
+#     .trigger(processingTime="1 seconds") \
+#     .outputMode("append") \
+#     .start()
+query= df.writeStream \
+    .format("console") \
+    .option("checkpointLocation", "/text") \
+    .outputMode("append") \
+    .trigger(processingTime="10 seconds") \
+    .start()
+# query.awaitTermination()
+
+# query.start()
