@@ -70,8 +70,9 @@ if "__name__" == "__main__":
         .format("kafka") \
         .option("kafka.bootstrap.servers", "localhost:9092") \
         .option("subscribe", "twitter_streaming") \
-        .load()
-    spark.sparkContext.setLogLevel("INFO")
+        .option("") \
+        .load("startingOffsets", "earliest")
+    # spark.sparkContext.setLogLevel("INFO")
     query = df.write \
         .queryName("all_tweets") \
         .outputMode("complete").format("console") \
