@@ -42,6 +42,7 @@ def check_rules(bearer_token:str, rules:list, tags:list) -> None:
 class Listener(tweepy.StreamingClient):
     def on_data(self, data):
         message = json.loads(data)
+        # print(message)
         send_message(message)
 
     def on_connect(self):
