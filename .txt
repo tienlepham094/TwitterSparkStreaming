@@ -10,7 +10,7 @@ vi ~/.bashrc
 kafka-server-start.sh ~/kafka_2.12-2.8.0/config/server.properties
 
 # read kafka consumer
-kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic twitter_streaming
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic twitter_consumer
 
 # reset offset
 kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group my-first-application --reset-offsets --to-earliest --topic twitter_streaming --execute
