@@ -14,5 +14,36 @@
 ### Introduction
 This project fetches recent tweets based on keywords about FAANG companies by Twitter API v2. Using Kafka to send tweets to Apache Spark Structured Streaming for processing. After that the data will send to MongoDB
 ### Working of the project
+![workflow](./assets/workflow.png)
+### Requirement
+- Python 3.8, WSL2
+- Twitter API v2 (tweepy)
+- Kafka 2.8.0
+- Spark 3.0.2
+- MongoDB
 ### Running the Application
+1.First step run kafka
+`Start zookeeper`
+```
+zookeeper-server-start.sh ~/kafka_2.12-2.8.0/config/zookeeper.properties
+```
+`Start kafka server`
+```
+kafka-server-start.sh ~/kafka_2.12-2.8.0/config/server.properties
+```
+`Read Kafka topic`
+```
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic twitter_streaming
+```
+2.Run `twitter_connect.py` file
+```
+cd twitter_api
+python2 twitter_connect.py
+```
+3.Run PySpark
+```
+cd pyspark/mongodb
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.2,org.apache.spark:spark-streaming-kafka-0-10_2.12:3.0.2,org.mongodb.spark:mongo-spark-connector_2.12:3.0.2 twitter_spark.py localhost:9092 subscribe twitter_streaming
+```
 ### Final Output
+![mongo](./assets/mongo.png)

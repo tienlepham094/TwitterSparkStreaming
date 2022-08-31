@@ -9,7 +9,7 @@ vi ~/.bashrc
 # start kafka server
 kafka-server-start.sh ~/kafka_2.12-2.8.0/config/server.properties
 
-# read kafka consumer
+# kafka consumer
 kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic twitter_streaming
 
 # reset offset
