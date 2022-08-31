@@ -21,6 +21,11 @@ This project fetches recent tweets based on keywords about FAANG companies by Tw
 - Kafka 2.8.0
 - Spark 3.0.2
 - MongoDB
+### File and Folder Structure
+- `config.json`: make rule to tweets streaming. Change to specify topics in https://github.com/twitterdev/twitter-context-annotations
+- `.env`: Twitter bearer token, mongodb connection string
+- `twitter_spark_to_kafka.py`: write stream after processing to kafka
+- `twitter_spark_console.py`: check the streaming in your console
 ### Running the Application
 1.First step run kafka
 `Start zookeeper`
