@@ -3,7 +3,7 @@ import json
 import os
 from dotenv import load_dotenv
 
-from twitter_kafka.twitter_kafka_producer import send_message
+from twitter_kafka_producer import send_message
 
 load_dotenv()
 
@@ -75,7 +75,6 @@ def main():
     # Setting up Tweepy filter configuration:
     check_rules(bearer_token, rules, tags)
     # Start and configure Kafka producer and topics:
-    # configure_create_topics(topics=tags)
     # Start streaming:
     Listener(bearer_token).filter(tweet_fields=['created_at'])
 

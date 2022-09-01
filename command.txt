@@ -14,3 +14,6 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic twitter_stre
 
 # reset offset
 kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group my-first-application --reset-offsets --to-earliest --topic twitter_streaming --execute
+
+#run web
+flask --app app run

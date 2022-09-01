@@ -5,7 +5,7 @@ var chartData =  {
         labels: ['Meta', 'Amazon', 'Netflix', 'Google', 'Apple'],
         datasets: [{
             label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
+            data: [0, 0, 0, 0, 0, 0],
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
@@ -47,10 +47,13 @@ var chartData =  {
     }
 }
 var myChart = new Chart(ctx, chartData);
-setInterval( () => {
-    chartData.data.datasets[0].data = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10),Math.floor(Math.random() * 10), 7, 8]
-    // console.log(chartData.data.datasets)
-    // addData(myChart)
-    // myChart.destroy()
-    myChart.update()
-},2000);
+
+setInterval(function(){
+    $.getJSON('/refreshData', function(data){
+        {
+            chartData.data.datasets[0].data = [parseInt(data.meta), parseInt(data.amz), parseInt(data.netflix), parseInt(data.gg), parseInt(data.apple)]
+            console.log(data.netflix)
+            myChart.update()
+        }
+    })
+} ,2000);
